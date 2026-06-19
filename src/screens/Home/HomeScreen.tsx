@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -6,6 +6,7 @@ import {
   Platform,
   Text,
   View,
+  ViewToken,
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,9 +36,21 @@ const StaticHeader = () => (
 export default function HomeScreen() {
   const { posts, loading, loadingMore, error, loadMoreError, fromCache, loadMore } = useFeed();
 
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      if (viewableItems[0]?.index != null) {
+        setActiveIndex(viewableItems[0].index);
+      }
+    },
+  ).current;
+
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 }).current;
+
   const renderItem: ListRenderItem<Post> = useCallback(
-    ({ item }) => <PostCard post={item} />,
-    [],
+    ({ item, index }) => <PostCard post={item} isActive={index === activeIndex} />,
+    [activeIndex],
   );
 
   const keyExtractor = useCallback((item: Post) => item.id, []);
@@ -104,6 +117,8 @@ export default function HomeScreen() {
         ItemSeparatorComponent={Divider}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={Platform.OS === 'ios'}
         contentContainerStyle={listContentStyle}

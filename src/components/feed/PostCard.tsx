@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
+import Video from 'react-native-video';
 import Icon from '../common/Icon';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,12 +9,21 @@ import { formatCount } from '../../utils/format';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const PostCard = memo(({ post }: PostCardProps) => {
+
+const PostCard = memo(({ post, isActive = false }: PostCardProps) => {
   const navigation = useNavigation<Nav>();
+  const openDetail = useCallback(
+    () => navigation.navigate('PostDetail', { post }),
+    [navigation, post],
+  );
+
   const [liked, setLiked] = useState(post.isLiked);
   const [bookmarked, setBookmarked] = useState(post.isBookmarked);
   const [following, setFollowing] = useState(post.isFollowing);
   const [likesCount, setLikesCount] = useState(post.likesCount);
+  const [muted, setMuted] = useState(true);
+
+  const toggleMuted = useCallback(() => setMuted(p => !p), []);
 
   const toggleLike = useCallback(() => {
     setLiked(prev => {
@@ -24,10 +34,6 @@ const PostCard = memo(({ post }: PostCardProps) => {
 
   const toggleBookmark = useCallback(() => setBookmarked(prev => !prev), []);
   const toggleFollow = useCallback(() => setFollowing(prev => !prev), []);
-  const openComments = useCallback(
-    () => navigation.navigate('Comments', { postId: post.id }),
-    [navigation, post.id],
-  );
 
   return (
     <View className="bg-white">
@@ -59,12 +65,36 @@ const PostCard = memo(({ post }: PostCardProps) => {
         </View>
       </View>
 
-      {/* Post Image */}
-      <Image
-        source={{ uri: post.imageUrl }}
-        className="w-full aspect-square"
-        resizeMode="cover"
-      />
+      {/* Media */}
+      <TouchableOpacity onPress={openDetail} activeOpacity={0.95}>
+        {post.type === 'video' && post.videoUrl ? (
+          <View className="w-full aspect-square bg-black">
+            <Video
+              source={{ uri: post.videoUrl }}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              resizeMode="cover"
+              paused={!isActive}
+              repeat
+              muted={muted}
+              poster={post.imageUrl}
+              posterResizeMode="cover"
+            />
+            <TouchableOpacity
+              className="absolute bottom-[10px] right-[10px] w-8 h-8 rounded-full bg-black/50 items-center justify-center"
+              onPress={toggleMuted}
+              activeOpacity={0.7}
+            >
+              <Icon name={muted ? 'volume-mute' : 'volume-high'} size={16} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Image
+            source={{ uri: post.imageUrl }}
+            className="w-full aspect-square"
+            resizeMode="cover"
+          />
+        )}
+      </TouchableOpacity>
 
       {/* Actions */}
       <View className="flex-row items-center justify-between px-3 pt-[10px] pb-[6px]">
@@ -75,9 +105,6 @@ const PostCard = memo(({ post }: PostCardProps) => {
               size={28}
               color={liked ? '#ed4956' : '#262626'}
             />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={openComments} activeOpacity={0.7} className="mr-4">
-            <Icon name="chatbubble-outline" size={26} color="#262626" />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} className="mr-4">
             <Icon name="paper-plane-outline" size={26} color="#262626" />
@@ -101,13 +128,9 @@ const PostCard = memo(({ post }: PostCardProps) => {
           <Text className="font-semibold">{post.username} </Text>
           {post.caption}
         </Text>
-        {post.commentsCount > 0 && (
-          <TouchableOpacity onPress={openComments} activeOpacity={0.7}>
-            <Text className="text-[13px] text-[#737373]">
-              View all {formatCount(post.commentsCount)} comments
-            </Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity onPress={openDetail} activeOpacity={0.7}>
+          <Text className="text-[13px] text-[#8e8e8e]">View details</Text>
+        </TouchableOpacity>
         <Text className="text-[10px] text-[#afafaf] uppercase tracking-[0.4px] mt-[2px]">
           {post.timestamp}
         </Text>
@@ -115,5 +138,6 @@ const PostCard = memo(({ post }: PostCardProps) => {
     </View>
   );
 });
+
 
 export default PostCard;

@@ -9,6 +9,7 @@ export type IconName =
   | 'bookmark-outline'
   | 'ellipsis-horizontal'
   | 'arrow-back'
+  | 'chevron-forward'
   | 'alert-circle-outline'
   | 'add-circle-outline'
   | 'add'
@@ -47,6 +48,7 @@ export type AuthState = {
 export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
+  PostDetail: { post: Post };
   Comments: { postId: string };
 };
 
@@ -71,10 +73,12 @@ export interface Comment {
 
 export interface Post {
   id: string;
+  type?: 'photo' | 'video';
   username: string;
   avatar: string;
   location?: string;
   imageUrl: string;
+  videoUrl?: string;
   likesCount: number;
   caption: string;
   commentsCount: number;
@@ -88,6 +92,7 @@ export interface Post {
 
 export interface PostCardProps {
   post: Post;
+  isActive?: boolean;
 }
 
 // ─── Reels ────────────────────────────────────────────────────────────────────

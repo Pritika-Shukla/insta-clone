@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import LoginScreen from '../screens/Auth/LoginScreen';
 import CommentsScreen from '../screens/Comments/CommentsScreen';
+import PostDetailScreen from '../screens/PostDetail/PostDetailScreen';
 import MainTabNavigator from './MainTabNavigator';
 import type { RootStackParamList } from '../types';
 
@@ -32,6 +33,7 @@ export default function RootNavigator() {
         {isLoggedIn ? (
           <>
             <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+            <Stack.Screen name="PostDetail" component={PostDetailScreen} />
             <Stack.Screen name="Comments" component={CommentsScreen} />
           </>
         ) : (
