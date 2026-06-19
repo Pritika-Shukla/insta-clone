@@ -55,9 +55,7 @@ const PostCard = memo(({ post }: PostCardProps) => {
               <Text className="text-[13px] font-semibold text-[#0095f6]">Follow</Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity className="pl-1" activeOpacity={0.6}>
-            <Icon name="ellipsis-horizontal" size={22} color="#262626" />
-          </TouchableOpacity>
+         
         </View>
       </View>
 
