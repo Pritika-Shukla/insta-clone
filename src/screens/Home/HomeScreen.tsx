@@ -1,50 +1,44 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { useAuthStore } from '../../store/authStore';
+import React, { useCallback } from 'react';
+import { FlatList, View, ListRenderItem } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { POSTS } from '../../data/feedData';
+import type { Post } from '../../types';
+import FeedHeader from '../../components/feed/FeedHeader';
+import StoriesBar from '../../components/feed/StoriesBar';
+import PostCard from '../../components/feed/PostCard';
+
+const Divider = () => <View className="h-2 bg-[#f0f0f0]" />;
+
+const ListHeader = () => (
+  <>
+    <FeedHeader />
+    <StoriesBar />
+  </>
+);
 
 export default function HomeScreen() {
-  const email = useAuthStore(state => state.email);
-  const logout = useAuthStore(state => state.logout);
+  const renderItem: ListRenderItem<Post> = useCallback(
+    ({ item }) => <PostCard post={item} />,
+    [],
+  );
 
-  const avatarChar = email ? email.charAt(0).toUpperCase() : '?';
-
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await logout();
-          } catch {
-            Alert.alert('Error', 'Failed to logout. Please try again.');
-          }
-        },
-      },
-    ]);
-  };
+  const keyExtractor = useCallback((item: Post) => item.id, []);
 
   return (
-    <View className="flex-1 justify-center items-center px-6 bg-slate-100">
-
-      <View className="w-20 h-20 rounded-full bg-indigo-600 justify-center items-center mb-4">
-        <Text className="text-4xl text-white font-bold">{avatarChar}</Text>
-      </View>
-
-      <Text className="text-2xl font-bold text-slate-800">Hello!</Text>
-      <Text className="text-sm text-slate-500 mt-1 mb-5">{email}</Text>
-
-      <Text className="text-xs text-slate-400 text-center mb-10 leading-5">
-        You are logged in. Your session is stored in AsyncStorage.
-      </Text>
-
-      <TouchableOpacity
-        className="bg-red-500 rounded-xl py-4 px-12"
-        onPress={handleLogout}>
-        <Text className="text-white text-base font-semibold">Logout</Text>
-      </TouchableOpacity>
-
-    </View>
+    <SafeAreaView className="flex-1 bg-[#fafafa]" edges={['top']}>
+      <FlatList
+        data={POSTS}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ListHeaderComponent={ListHeader}
+        ItemSeparatorComponent={Divider}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews
+        initialNumToRender={4}
+        maxToRenderPerBatch={4}
+        windowSize={8}
+        contentContainerStyle={{ paddingBottom: 16 }}
+      />
+    </SafeAreaView>
   );
 }
