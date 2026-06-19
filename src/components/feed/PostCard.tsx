@@ -1,10 +1,15 @@
 import React, { memo, useCallback, useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import type { PostCardProps } from '../../types';
+import Icon from '../common/Icon';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { PostCardProps, RootStackParamList } from '../../types';
 import { formatCount } from '../../utils/format';
 
+type Nav = NativeStackNavigationProp<RootStackParamList>;
+
 const PostCard = memo(({ post }: PostCardProps) => {
+  const navigation = useNavigation<Nav>();
   const [liked, setLiked] = useState(post.isLiked);
   const [bookmarked, setBookmarked] = useState(post.isBookmarked);
   const [following, setFollowing] = useState(post.isFollowing);
@@ -19,6 +24,10 @@ const PostCard = memo(({ post }: PostCardProps) => {
 
   const toggleBookmark = useCallback(() => setBookmarked(prev => !prev), []);
   const toggleFollow = useCallback(() => setFollowing(prev => !prev), []);
+  const openComments = useCallback(
+    () => navigation.navigate('Comments', { postId: post.id }),
+    [navigation, post.id],
+  );
 
   return (
     <View className="bg-white">
@@ -47,7 +56,7 @@ const PostCard = memo(({ post }: PostCardProps) => {
             </TouchableOpacity>
           )}
           <TouchableOpacity className="pl-1" activeOpacity={0.6}>
-            <Ionicons name="ellipsis-horizontal" size={22} color="#262626" />
+            <Icon name="ellipsis-horizontal" size={22} color="#262626" />
           </TouchableOpacity>
         </View>
       </View>
@@ -63,21 +72,21 @@ const PostCard = memo(({ post }: PostCardProps) => {
       <View className="flex-row items-center justify-between px-3 pt-[10px] pb-[6px]">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={toggleLike} activeOpacity={0.7} className="mr-4">
-            <Ionicons
+            <Icon
               name={liked ? 'heart' : 'heart-outline'}
               size={28}
               color={liked ? '#ed4956' : '#262626'}
             />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} className="mr-4">
-            <Ionicons name="chatbubble-outline" size={26} color="#262626" />
+          <TouchableOpacity onPress={openComments} activeOpacity={0.7} className="mr-4">
+            <Icon name="chatbubble-outline" size={26} color="#262626" />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} className="mr-4">
-            <Ionicons name="paper-plane-outline" size={26} color="#262626" />
+            <Icon name="paper-plane-outline" size={26} color="#262626" />
           </TouchableOpacity>
         </View>
         <TouchableOpacity onPress={toggleBookmark} activeOpacity={0.7}>
-          <Ionicons
+          <Icon
             name={bookmarked ? 'bookmark' : 'bookmark-outline'}
             size={26}
             color="#262626"
@@ -95,7 +104,7 @@ const PostCard = memo(({ post }: PostCardProps) => {
           {post.caption}
         </Text>
         {post.commentsCount > 0 && (
-          <TouchableOpacity activeOpacity={0.7}>
+          <TouchableOpacity onPress={openComments} activeOpacity={0.7}>
             <Text className="text-[13px] text-[#737373]">
               View all {formatCount(post.commentsCount)} comments
             </Text>

@@ -26,11 +26,4 @@ export const storage = {
     }
   },
 
-  async clear(): Promise<void> {
-    try {
-      await AsyncStorage.clear();
-    } catch {
-      throw new Error('Failed to clear storage');
-    }
-  },
 };

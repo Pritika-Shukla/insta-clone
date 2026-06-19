@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon from '../common/Icon';
 import { STORIES } from '../../data/feedData';
 import type { StoryItemProps } from '../../types';
 
@@ -19,7 +19,7 @@ const StoryItem = memo(({ story }: StoryItemProps) => (
         />
         {story.isOwn && (
           <View className="absolute bottom-0 -right-[2px] w-5 h-5 rounded-full bg-[#0095f6] justify-center items-center border-2 border-white">
-            <Ionicons name="add" size={11} color="#fff" />
+            <Icon name="add" size={11} color="#fff" />
           </View>
         )}
       </View>
@@ -35,6 +35,7 @@ export default function StoriesBar() {
     <View className="bg-white py-[10px] border-b border-[#dbdbdb]">
       <ScrollView
         horizontal
+        nestedScrollEnabled
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 10 }}
       >

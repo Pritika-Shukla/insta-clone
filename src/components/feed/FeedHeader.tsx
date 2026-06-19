@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon from '../common/Icon';
 
 export default function FeedHeader() {
   return (
@@ -10,13 +10,13 @@ export default function FeedHeader() {
       </Text>
       <View className="flex-row items-center">
         <TouchableOpacity className="ml-[18px]" activeOpacity={0.6}>
-          <Ionicons name="add-circle-outline" size={27} color="#000" />
+          <Icon name="add-circle-outline" size={27} color="#000" />
         </TouchableOpacity>
         <TouchableOpacity className="ml-[18px]" activeOpacity={0.6}>
-          <Ionicons name="heart-outline" size={27} color="#000" />
+          <Icon name="heart-outline" size={27} color="#000" />
         </TouchableOpacity>
         <TouchableOpacity className="ml-[18px]" activeOpacity={0.6}>
-          <Ionicons name="paper-plane-outline" size={26} color="#000" />
+          <Icon name="paper-plane-outline" size={26} color="#000" />
         </TouchableOpacity>
       </View>
     </View>
