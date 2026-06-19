@@ -68,13 +68,6 @@ export interface Comment {
 
 // ─── Feed ────────────────────────────────────────────────────────────────────
 
-export interface Story {
-  id: string;
-  username: string;
-  avatar: string;
-  hasStory: boolean;
-  isOwn?: boolean;
-}
 
 export interface Post {
   id: string;
@@ -92,10 +85,6 @@ export interface Post {
 }
 
 // ─── Component Props ─────────────────────────────────────────────────────────
-
-export interface StoryItemProps {
-  story: Story;
-}
 
 export interface PostCardProps {
   post: Post;

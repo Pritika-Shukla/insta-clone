@@ -11,7 +11,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Post } from '../../types';
 import FeedHeader from '../../components/feed/FeedHeader';
-import StoriesBar from '../../components/feed/StoriesBar';
 import PostCard from '../../components/feed/PostCard';
 import Icon from '../../components/common/Icon';
 import { useFeed } from '../../hooks/useFeed';
@@ -30,7 +29,6 @@ const OfflineBanner = () => (
 const StaticHeader = () => (
   <>
     <FeedHeader />
-    <StoriesBar />
   </>
 );
 
@@ -48,7 +46,6 @@ export default function HomeScreen() {
     () => (
       <>
         <FeedHeader />
-        <StoriesBar />
         {fromCache && <OfflineBanner />}
       </>
     ),
