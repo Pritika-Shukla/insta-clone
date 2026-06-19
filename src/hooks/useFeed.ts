@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { feedApi } from '../services/api/feedApi';
+import { feedCache } from '../services/feedCache';
 import type { PexelsPhoto, Post } from '../types';
 
 const mapPhotoToPost = (photo: PexelsPhoto): Post => ({
@@ -21,19 +22,42 @@ export function useFeed() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(false);
+  const [fromCache, setFromCache] = useState(false);
 
   const nextPageUrl = useRef<string | null>(null);
   const isFetching = useRef(false);
 
   useEffect(() => {
-    feedApi
-      .fetch()
-      .then(data => {
-        setPosts(data.photos.map(mapPhotoToPost));
+    let cancelled = false;
+
+    const loadFeed = async () => {
+      const cached = await feedCache.get();
+      if (cached?.length && !cancelled) {
+        setPosts(cached);
+        setFromCache(true);
+        setLoading(false);
+      }
+
+      try {
+        const data = await feedApi.fetch();
+        if (cancelled) return;
+
+        const fresh = data.photos.map(mapPhotoToPost);
+        setPosts(fresh);
+        setFromCache(false);
         nextPageUrl.current = data.next_page ?? null;
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+
+        await feedCache.set(fresh);
+      } catch {
+        if (cancelled) return;
+        if (!cached?.length) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadFeed();
+    return () => { cancelled = true; };
   }, []);
 
   const loadMore = useCallback(() => {
@@ -55,5 +79,5 @@ export function useFeed() {
       });
   }, []);
 
-  return { posts, loading, loadingMore, error, loadMore };
+  return { posts, loading, loadingMore, error, fromCache, loadMore };
 }

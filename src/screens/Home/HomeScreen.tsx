@@ -6,6 +6,7 @@ import {
   Platform,
   Text,
   View,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Post } from '../../types';
@@ -14,19 +15,28 @@ import StoriesBar from '../../components/feed/StoriesBar';
 import PostCard from '../../components/feed/PostCard';
 import Icon from '../../components/common/Icon';
 import { useFeed } from '../../hooks/useFeed';
+import { FeedSkeleton } from '../../components/feed/FeedSkeleton';
 
 const Divider = () => <View className="h-2 bg-[#f0f0f0]" />;
 const listContentStyle = { paddingBottom: 16 };
 
-const ListHeader = () => (
+const OfflineBanner = () => (
+  <View className="flex-row items-center justify-center gap-1.5 bg-[#fff3cd] py-2 px-4">
+    <Icon name="alert-circle-outline" size={14} color="#856404" />
+    <Text className="text-xs text-[#856404]">You're offline — showing cached posts</Text>
+  </View>
+);
+
+const ListHeader = ({ fromCache }: { fromCache: boolean }) => (
   <>
     <FeedHeader />
     <StoriesBar />
+    {fromCache && <OfflineBanner />}
   </>
 );
 
 export default function HomeScreen() {
-  const { posts, loading, loadingMore, error, loadMore } = useFeed();
+  const { posts, loading, loadingMore, error, fromCache, loadMore } = useFeed();
 
   const renderItem: ListRenderItem<Post> = useCallback(
     ({ item }) => <PostCard post={item} />,
@@ -48,10 +58,10 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-[#fafafa]" edges={['top']}>
-        <ListHeader />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#8e8e8e" />
-        </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <ListHeader />
+          <FeedSkeleton />
+        </ScrollView>
       </SafeAreaView>
     );
   }
