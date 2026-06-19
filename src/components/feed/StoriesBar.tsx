@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from '../common/Icon';
-import { STORIES } from '../../data/feedData';
+import { useStories } from '../../hooks/useStories';
 import type { StoryItemProps } from '../../types';
 
 const StoryItem = memo(({ story }: StoryItemProps) => (
@@ -31,6 +31,8 @@ const StoryItem = memo(({ story }: StoryItemProps) => (
 ));
 
 export default function StoriesBar() {
+  const { stories } = useStories();
+
   return (
     <View className="bg-white py-[10px] border-b border-[#dbdbdb]">
       <ScrollView
@@ -39,7 +41,7 @@ export default function StoriesBar() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 10 }}
       >
-        {STORIES.map(story => (
+        {stories.map(story => (
           <StoryItem key={story.id} story={story} />
         ))}
       </ScrollView>

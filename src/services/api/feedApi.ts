@@ -3,7 +3,7 @@ import { PEXELS_API_KEY } from '../../constants';
 import type { PexelsPhotoResponse } from '../../types';
 
 const INITIAL_URL =
-  'https://api.pexels.com/v1/search?query=lifestyle+travel+food&per_page=5';
+  'https://api.pexels.com/v1/search?query=lifestyle+travel+food&per_page=15';
 
 export const feedApi = {
   fetch: (url: string = INITIAL_URL) =>
