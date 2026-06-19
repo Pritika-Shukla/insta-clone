@@ -1,50 +1,116 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { useAuthStore } from '../../store/authStore';
+import React, { useCallback } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  ListRenderItem,
+  Platform,
+  Text,
+  View,
+  ScrollView,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import type { Post } from '../../types';
+import FeedHeader from '../../components/feed/FeedHeader';
+import StoriesBar from '../../components/feed/StoriesBar';
+import PostCard from '../../components/feed/PostCard';
+import Icon from '../../components/common/Icon';
+import { useFeed } from '../../hooks/useFeed';
+import { FeedSkeleton } from '../../components/feed/FeedSkeleton';
+
+const Divider = () => <View className="h-2 bg-[#f0f0f0]" />;
+const listContentStyle = { paddingBottom: 16 };
+
+const OfflineBanner = () => (
+  <View className="flex-row items-center justify-center gap-1.5 bg-[#fff3cd] py-2 px-4">
+    <Icon name="alert-circle-outline" size={14} color="#856404" />
+    <Text className="text-xs text-[#856404]">You're offline — showing cached posts</Text>
+  </View>
+);
+
+const StaticHeader = () => (
+  <>
+    <FeedHeader />
+    <StoriesBar />
+  </>
+);
 
 export default function HomeScreen() {
-  const email = useAuthStore(state => state.email);
-  const logout = useAuthStore(state => state.logout);
+  const { posts, loading, loadingMore, error, loadMoreError, fromCache, loadMore } = useFeed();
 
-  const avatarChar = email ? email.charAt(0).toUpperCase() : '?';
+  const renderItem: ListRenderItem<Post> = useCallback(
+    ({ item }) => <PostCard post={item} />,
+    [],
+  );
 
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await logout();
-          } catch {
-            Alert.alert('Error', 'Failed to logout. Please try again.');
-          }
-        },
-      },
-    ]);
-  };
+  const keyExtractor = useCallback((item: Post) => item.id, []);
+
+  const renderHeader = useCallback(
+    () => (
+      <>
+        <FeedHeader />
+        <StoriesBar />
+        {fromCache && <OfflineBanner />}
+      </>
+    ),
+    [fromCache],
+  );
+
+  const renderFooter = useCallback(
+    () =>
+      loadingMore ? (
+        <View className="py-4 items-center">
+          <ActivityIndicator size="small" color="#8e8e8e" />
+        </View>
+      ) : loadMoreError ? (
+        <View className="flex-row items-center justify-center gap-1.5 py-4">
+          <Icon name="alert-circle-outline" size={14} color="#8e8e8e" />
+          <Text className="text-xs text-[#8e8e8e]">No connection — can't load more</Text>
+        </View>
+      ) : null,
+    [loadingMore, loadMoreError],
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#fafafa]" edges={['top']}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <StaticHeader />
+          <FeedSkeleton />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#fafafa]" edges={['top']}>
+        <StaticHeader />
+        <View className="flex-1 items-center justify-center px-8">
+          <Icon name="alert-circle-outline" size={52} color="#c7c7c7" />
+          <Text className="text-sm text-[#8e8e8e] mt-3 text-center">
+            Couldn't load posts. Check your connection.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <View className="flex-1 justify-center items-center px-6 bg-slate-100">
-
-      <View className="w-20 h-20 rounded-full bg-indigo-600 justify-center items-center mb-4">
-        <Text className="text-4xl text-white font-bold">{avatarChar}</Text>
-      </View>
-
-      <Text className="text-2xl font-bold text-slate-800">Hello!</Text>
-      <Text className="text-sm text-slate-500 mt-1 mb-5">{email}</Text>
-
-      <Text className="text-xs text-slate-400 text-center mb-10 leading-5">
-        You are logged in. Your session is stored in AsyncStorage.
-      </Text>
-
-      <TouchableOpacity
-        className="bg-red-500 rounded-xl py-4 px-12"
-        onPress={handleLogout}>
-        <Text className="text-white text-base font-semibold">Logout</Text>
-      </TouchableOpacity>
-
-    </View>
+    <SafeAreaView className="flex-1 bg-[#fafafa]" edges={['top']}>
+      <FlatList
+        className="flex-1"
+        data={posts}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
+        ItemSeparatorComponent={Divider}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={Platform.OS === 'ios'}
+        contentContainerStyle={listContentStyle}
+      />
+    </SafeAreaView>
   );
 }

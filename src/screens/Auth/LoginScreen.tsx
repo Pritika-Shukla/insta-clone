@@ -14,13 +14,14 @@ import { EMAIL_REGEX } from '../../constants';
 
 export default function LoginScreen() {
   const login = useAuthStore(state => state.login);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please enter email and password.');
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
     if (!EMAIL_REGEX.test(email.trim())) {
@@ -29,7 +30,7 @@ export default function LoginScreen() {
     }
     setLoading(true);
     try {
-      await login(email.trim());
+      await login(name.trim(), email.trim());
     } catch {
       Alert.alert('Error', 'Login failed. Please try again.');
     } finally {
@@ -53,6 +54,20 @@ export default function LoginScreen() {
         <View className="bg-white rounded-2xl p-6 shadow-md">
 
           <Text className="text-xs font-semibold text-slate-600 mb-1 mt-3">
+            Name
+          </Text>
+          <TextInput
+            className="border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 bg-slate-50"
+            placeholder="Enter your name"
+            placeholderTextColor="#94a3b8"
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+            autoCorrect={false}
+            textContentType="name"
+          />
+
+          <Text className="text-xs font-semibold text-slate-600 mb-1 mt-4">
             Email
           </Text>
           <TextInput
