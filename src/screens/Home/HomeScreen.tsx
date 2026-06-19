@@ -27,16 +27,15 @@ const OfflineBanner = () => (
   </View>
 );
 
-const ListHeader = ({ fromCache }: { fromCache: boolean }) => (
+const StaticHeader = () => (
   <>
     <FeedHeader />
     <StoriesBar />
-    {fromCache && <OfflineBanner />}
   </>
 );
 
 export default function HomeScreen() {
-  const { posts, loading, loadingMore, error, fromCache, loadMore } = useFeed();
+  const { posts, loading, loadingMore, error, loadMoreError, fromCache, loadMore } = useFeed();
 
   const renderItem: ListRenderItem<Post> = useCallback(
     ({ item }) => <PostCard post={item} />,
@@ -45,21 +44,37 @@ export default function HomeScreen() {
 
   const keyExtractor = useCallback((item: Post) => item.id, []);
 
+  const renderHeader = useCallback(
+    () => (
+      <>
+        <FeedHeader />
+        <StoriesBar />
+        {fromCache && <OfflineBanner />}
+      </>
+    ),
+    [fromCache],
+  );
+
   const renderFooter = useCallback(
     () =>
       loadingMore ? (
         <View className="py-4 items-center">
           <ActivityIndicator size="small" color="#8e8e8e" />
         </View>
+      ) : loadMoreError ? (
+        <View className="flex-row items-center justify-center gap-1.5 py-4">
+          <Icon name="alert-circle-outline" size={14} color="#8e8e8e" />
+          <Text className="text-xs text-[#8e8e8e]">No connection — can't load more</Text>
+        </View>
       ) : null,
-    [loadingMore],
+    [loadingMore, loadMoreError],
   );
 
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-[#fafafa]" edges={['top']}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <ListHeader />
+          <StaticHeader />
           <FeedSkeleton />
         </ScrollView>
       </SafeAreaView>
@@ -69,7 +84,7 @@ export default function HomeScreen() {
   if (error) {
     return (
       <SafeAreaView className="flex-1 bg-[#fafafa]" edges={['top']}>
-        <ListHeader />
+        <StaticHeader />
         <View className="flex-1 items-center justify-center px-8">
           <Icon name="alert-circle-outline" size={52} color="#c7c7c7" />
           <Text className="text-sm text-[#8e8e8e] mt-3 text-center">
@@ -87,7 +102,7 @@ export default function HomeScreen() {
         data={posts}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        ListHeaderComponent={ListHeader}
+        ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         ItemSeparatorComponent={Divider}
         onEndReached={loadMore}

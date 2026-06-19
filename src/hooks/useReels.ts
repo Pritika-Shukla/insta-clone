@@ -7,6 +7,7 @@ export function useReels() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState(false);
 
   const nextPageUrl = useRef<string | null>(null);
   const isFetching = useRef(false);
@@ -23,7 +24,7 @@ export function useReels() {
   }, []);
 
   const loadMore = useCallback(() => {
-    if (isFetching.current || !nextPageUrl.current) return;
+    if (isFetching.current || !nextPageUrl.current || loadMoreError) return;
 
     isFetching.current = true;
     setLoadingMore(true);
@@ -33,13 +34,14 @@ export function useReels() {
       .then(data => {
         setVideos(prev => [...prev, ...data.videos]);
         nextPageUrl.current = data.next_page ?? null;
+        setLoadMoreError(false);
       })
-      .catch(() => {})
+      .catch(() => setLoadMoreError(true))
       .finally(() => {
         setLoadingMore(false);
         isFetching.current = false;
       });
-  }, []);
+  }, [loadMoreError]);
 
-  return { videos, loading, loadingMore, error, loadMore };
+  return { videos, loading, loadingMore, error, loadMoreError, loadMore };
 }

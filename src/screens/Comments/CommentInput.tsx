@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react';
+import React, { memo, RefObject } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -15,7 +15,7 @@ interface CommentInputProps {
   onPost: () => void;
 }
 
-export const CommentInput = ({ inputRef, text, onChangeText, onPost }: CommentInputProps) => (
+export const CommentInput = memo(({ inputRef, text, onChangeText, onPost }: CommentInputProps) => (
   <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <View className="flex-row items-center px-3 py-2 border-t border-[#dbdbdb] gap-2">
       <View className="w-8 h-8 rounded-full bg-[#e8eaf6] items-center justify-center">
@@ -41,4 +41,4 @@ export const CommentInput = ({ inputRef, text, onChangeText, onPost }: CommentIn
       </View>
     </View>
   </KeyboardAvoidingView>
-);
+));

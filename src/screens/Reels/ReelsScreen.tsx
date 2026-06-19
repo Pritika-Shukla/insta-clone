@@ -14,6 +14,8 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import Video from 'react-native-video';
 import Icon from '../../components/common/Icon';
 import { useReels } from '../../hooks/useReels';
+import { useReelInteractions } from '../../hooks/useReelInteractions';
+import ReelCommentsSheet from './ReelCommentsSheet';
 import type { PexelsVideo, PexelsVideoFile, ReelItemProps } from '../../types';
 
 function getBestVideoUrl(files: PexelsVideoFile[]): string {
@@ -25,7 +27,6 @@ function getBestVideoUrl(files: PexelsVideoFile[]): string {
     ''
   );
 }
-
 
 const useShimmer = () => {
   const anim = useRef(new Animated.Value(0.2)).current;
@@ -47,7 +48,6 @@ const ReelSkeleton = ({ height }: { height: number }) => {
   const box = (w: number | string, h: number, extra?: object) => (
     <Animated.View className="bg-[#3a3a3a]" style={[{ width: w, height: h, opacity }, extra]} />
   );
-
   return (
     <View className="w-full bg-[#1a1a1a]" style={{ height }}>
       <View className="absolute right-3 bottom-20 items-center gap-5">
@@ -56,7 +56,6 @@ const ReelSkeleton = ({ height }: { height: number }) => {
         {box(32, 32, { borderRadius: 16 })}
         {box(28, 28, { borderRadius: 14 })}
       </View>
-
       <View className="absolute bottom-6 left-4 right-20">
         {box(120, 14, { borderRadius: 7, marginBottom: 8 })}
         {box('80%', 12, { borderRadius: 6, marginBottom: 5 })}
@@ -68,12 +67,12 @@ const ReelSkeleton = ({ height }: { height: number }) => {
 
 // ─── Reel item ────────────────────────────────────────────────────────────────
 
-const ReelItem = memo(({ item, isActive, height, isLast, loadingMore }: ReelItemProps) => {
-  const [liked, setLiked] = useState(false);
+const ReelItem = memo(({
+  item, isActive, height, isLast, loadingMore,
+  isLiked, onToggleLike, onOpenComments,
+}: ReelItemProps) => {
   const [muted, setMuted] = useState(true);
   const videoUrl = getBestVideoUrl(item.video_files);
-
-  const toggleLike = useCallback(() => setLiked(p => !p), []);
   const toggleMuted = useCallback(() => setMuted(p => !p), []);
 
   return (
@@ -87,44 +86,36 @@ const ReelItem = memo(({ item, isActive, height, isLast, loadingMore }: ReelItem
         muted={muted}
       />
 
-      <View className="absolute bottom-0 left-0 right-0 h-[200px] bg-black/[0.45]" />
-
       {isLast && loadingMore && (
         <View className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 items-center justify-center">
           <ActivityIndicator size="small" color="rgba(255,255,255,0.7)" />
         </View>
       )}
 
-      <View className="absolute right-3 bottom-20 items-center gap-5">
-        <TouchableOpacity
-          className="items-center justify-center"
-          onPress={toggleLike}
-          activeOpacity={0.7}
-        >
+      {/* Action buttons */}
+      <View className="absolute right-3 bottom-24 items-center gap-5">
+        <TouchableOpacity className="items-center" onPress={onToggleLike} activeOpacity={0.7}>
           <Icon
-            name={liked ? 'heart' : 'heart-outline'}
-            size={28}
-            color={liked ? '#ed4956' : '#fff'}
+            name={isLiked ? 'heart' : 'heart-outline'}
+            size={30}
+            color={isLiked ? '#ed4956' : '#fff'}
           />
         </TouchableOpacity>
 
-        <TouchableOpacity className="items-center justify-center" activeOpacity={0.7}>
+        <TouchableOpacity className="items-center" onPress={onOpenComments} activeOpacity={0.7}>
           <Icon name="chatbubble-outline" size={28} color="#fff" />
         </TouchableOpacity>
 
-        <TouchableOpacity className="items-center justify-center" activeOpacity={0.7}>
+        <TouchableOpacity className="items-center" activeOpacity={0.7}>
           <Icon name="paper-plane-outline" size={28} color="#fff" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          className="items-center justify-center"
-          onPress={toggleMuted}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity className="items-center" onPress={toggleMuted} activeOpacity={0.7}>
           <Icon name={muted ? 'volume-mute' : 'volume-high'} size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
+      {/* Info */}
       <View className="absolute bottom-6 left-4 right-20">
         <Text className="text-white text-[15px] font-bold mb-1">
           @{item.user.name.toLowerCase().replace(/\s+/g, '_')}
@@ -144,25 +135,25 @@ export default function ReelsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const reelHeight = screenHeight - tabBarHeight;
 
-  const { videos, loading, loadingMore, error, loadMore } = useReels();
+  const { videos, loading, loadingMore, error, loadMoreError, loadMore } = useReels();
+  const { likedIds, toggleLike } = useReelInteractions();
+
   const [activeIndex, setActiveIndex] = useState(0);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+
+  const openComments  = useCallback(() => setCommentsOpen(true), []);
+  const closeComments = useCallback(() => setCommentsOpen(false), []);
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems[0]?.index != null) {
-        setActiveIndex(viewableItems[0].index);
-      }
+      if (viewableItems[0]?.index !== null && viewableItems[0]?.index !== undefined) setActiveIndex(viewableItems[0].index);
     },
   ).current;
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 80 }).current;
 
   const getItemLayout = useCallback(
-    (_: unknown, index: number) => ({
-      length: reelHeight,
-      offset: reelHeight * index,
-      index,
-    }),
+    (_: unknown, index: number) => ({ length: reelHeight, offset: reelHeight * index, index }),
     [reelHeight],
   );
 
@@ -174,9 +165,12 @@ export default function ReelsScreen() {
         height={reelHeight}
         isLast={index === videos.length - 1}
         loadingMore={loadingMore}
+        isLiked={likedIds.has(String(item.id))}
+        onToggleLike={() => toggleLike(String(item.id))}
+        onOpenComments={openComments}
       />
     ),
-    [activeIndex, reelHeight, videos.length, loadingMore],
+    [activeIndex, reelHeight, videos.length, loadingMore, likedIds, toggleLike, openComments],
   );
 
   const keyExtractor = useCallback((item: PexelsVideo) => String(item.id), []);
@@ -209,7 +203,7 @@ export default function ReelsScreen() {
         getItemLayout={getItemLayout}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
-        onEndReached={loadMore}
+        onEndReached={loadMoreError ? undefined : loadMore}
         onEndReachedThreshold={0.5}
         pagingEnabled
         showsVerticalScrollIndicator={false}
@@ -217,6 +211,8 @@ export default function ReelsScreen() {
         snapToAlignment="start"
         decelerationRate="fast"
       />
+
+      <ReelCommentsSheet visible={commentsOpen} onClose={closeComments} />
     </View>
   );
 }

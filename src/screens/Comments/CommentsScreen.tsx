@@ -1,28 +1,52 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { FlatList, ListRenderItem, Text, TextInput, View } from 'react-native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, ListRenderItem, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from '../../components/common/Icon';
 import { useComments } from '../../hooks/useComments';
-import type { Comment } from '../../types';
+import { useCommentInteractions } from '../../hooks/useCommentInteractions';
+import type { Comment, RootStackParamList } from '../../types';
 import { CommentsHeader } from './CommentsHeader';
 import { CommentItem } from './CommentItem';
 import { CommentSkeleton } from './CommentSkeleton';
 import { CommentInput } from './CommentInput';
 
 const Divider = () => <View className="h-px bg-[#f0f0f0] ml-16" />;
-
 const listContentStyle = { paddingBottom: 12 };
 
+const Footer = ({ loadingMore }: { loadingMore: boolean }) =>
+  loadingMore ? (
+    <ActivityIndicator size="small" color="#c7c7c7" style={{ paddingVertical: 16 }} />
+  ) : null;
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Route = RouteProp<RootStackParamList, 'Comments'>;
+
 export default function CommentsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Nav>();
+  const route = useRoute<Route>();
+  const postId = route.params?.postId ?? '1';
+
   const inputRef = useRef<TextInput>(null);
-  const { comments, loading, error, addComment } = useComments(1);
+  const { comments, loading, loadingMore, hasMore, error, loadMore } = useComments();
+  const { likedIds, toggleLike, userComments, addUserComment } = useCommentInteractions();
   const [text, setText] = useState('');
 
+  const allComments = useMemo(
+    () => [...userComments, ...comments],
+    [userComments, comments],
+  );
+
   const renderItem: ListRenderItem<Comment> = useCallback(
-    ({ item }) => <CommentItem item={item} />,
-    [],
+    ({ item }) => (
+      <CommentItem
+        item={item}
+        isLiked={likedIds.has(String(item.id))}
+        onToggleLike={() => toggleLike(String(item.id))}
+      />
+    ),
+    [likedIds, toggleLike],
   );
 
   const keyExtractor = useCallback((item: Comment) => String(item.id), []);
@@ -30,15 +54,15 @@ export default function CommentsScreen() {
 
   const handlePost = useCallback(() => {
     if (!text.trim()) return;
-    addComment({
+    addUserComment({
       id: Date.now(),
-      postId: 1,
+      postId: Number(postId),
       name: 'You',
       email: 'you@example.com',
       body: text.trim(),
     });
     setText('');
-  }, [text, addComment]);
+  }, [text, postId, addUserComment]);
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -57,12 +81,15 @@ export default function CommentsScreen() {
 
       {!loading && !error && (
         <FlatList
-          data={comments}
+          data={allComments}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
           ItemSeparatorComponent={Divider}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={listContentStyle}
+          onEndReached={hasMore ? loadMore : undefined}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={<Footer loadingMore={loadingMore} />}
         />
       )}
 

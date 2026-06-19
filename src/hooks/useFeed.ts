@@ -26,6 +26,7 @@ export function useFeed() {
 
   const nextPageUrl = useRef<string | null>(null);
   const isFetching = useRef(false);
+  const [loadMoreError, setLoadMoreError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +62,7 @@ export function useFeed() {
   }, []);
 
   const loadMore = useCallback(() => {
-    if (isFetching.current || !nextPageUrl.current) return;
+    if (isFetching.current || !nextPageUrl.current || loadMoreError) return;
 
     isFetching.current = true;
     setLoadingMore(true);
@@ -71,13 +72,16 @@ export function useFeed() {
       .then(data => {
         setPosts(prev => [...prev, ...data.photos.map(mapPhotoToPost)]);
         nextPageUrl.current = data.next_page ?? null;
+        setLoadMoreError(false);
       })
-      .catch(() => {})
+      .catch(() => {
+        setLoadMoreError(true);
+      })
       .finally(() => {
         setLoadingMore(false);
         isFetching.current = false;
       });
-  }, []);
+  }, [loadMoreError]);
 
-  return { posts, loading, loadingMore, error, fromCache, loadMore };
+  return { posts, loading, loadingMore, error, loadMoreError, fromCache, loadMore };
 }

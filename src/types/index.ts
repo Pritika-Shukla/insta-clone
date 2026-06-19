@@ -17,7 +17,11 @@ export type IconName =
   | 'play-circle'
   | 'play-circle-outline'
   | 'volume-high'
-  | 'volume-mute';
+  | 'volume-mute'
+  | 'person'
+  | 'person-outline'
+  | 'log-out-outline'
+  | 'grid-outline';
 
 export interface IconProps {
   name: IconName;
@@ -27,13 +31,14 @@ export interface IconProps {
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
-export type AuthUser = { email: string };
+export type AuthUser = { name: string; email: string };
 
 export type AuthState = {
   isLoggedIn: boolean | null;
+  name: string;
   email: string;
   hydrate: () => Promise<void>;
-  login: (email: string) => Promise<void>;
+  login: (name: string, email: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -48,6 +53,7 @@ export type RootStackParamList = {
 export type TabParamList = {
   Feed: undefined;
   Reels: undefined;
+  Profile: undefined;
 };
 
 // ─── Comments ─────────────────────────────────────────────────────────────────
@@ -103,6 +109,9 @@ export interface ReelItemProps {
   height: number;
   isLast: boolean;
   loadingMore: boolean;
+  isLiked: boolean;
+  onToggleLike: () => void;
+  onOpenComments: () => void;
 }
 
 // ─── Pexels Photos ────────────────────────────────────────────────────────────

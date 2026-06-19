@@ -117,6 +117,30 @@ const ICONS: Record<IconName, RenderFn> = {
       <Path d="M23 9l-6 6M17 9l6 6" />
     </G>
   ),
+  'person': color => (
+    <G fill={color}>
+      <Circle cx={12} cy={8} r={4} />
+      <Path d="M20 21a8 8 0 1 0-16 0h16z" />
+    </G>
+  ),
+  'person-outline': color => (
+    <G fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <Circle cx={12} cy={8} r={4} />
+      <Path d="M20 21a8 8 0 1 0-16 0" />
+    </G>
+  ),
+  'log-out-outline': color => (
+    <G fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <Path d="M16 17l5-5-5-5" />
+      <Path d="M21 12H9" />
+    </G>
+  ),
+  'grid-outline': color => (
+    <G fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />
+    </G>
+  ),
 };
 
 const Icon = memo(({ name, size = 24, color = '#000000' }: IconProps) => (
