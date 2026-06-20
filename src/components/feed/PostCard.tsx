@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { Share, View, Text, Image, TouchableOpacity } from 'react-native';
 import Video from 'react-native-video';
 import Icon from '../common/Icon';
 import { useNavigation } from '@react-navigation/native';
@@ -34,6 +34,11 @@ const PostCard = memo(({ post, isActive = false }: PostCardProps) => {
 
   const toggleBookmark = useCallback(() => setBookmarked(prev => !prev), []);
   const toggleFollow = useCallback(() => setFollowing(prev => !prev), []);
+
+  const handleShare = useCallback(async () => {
+    const url = `https://myapp.com/posts/${post.id}`;
+    await Share.share({ message: url, url });
+  }, [post.id]);
 
   return (
     <View className="bg-white">
@@ -106,7 +111,7 @@ const PostCard = memo(({ post, isActive = false }: PostCardProps) => {
               color={liked ? '#ed4956' : '#262626'}
             />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} className="mr-4">
+          <TouchableOpacity onPress={handleShare} activeOpacity={0.7} className="mr-4">
             <Icon name="paper-plane-outline" size={26} color="#262626" />
           </TouchableOpacity>
         </View>

@@ -3,6 +3,7 @@ import {
   FlatList,
   Image,
   ListRenderItem,
+  Share,
   Text,
   TouchableOpacity,
   useWindowDimensions,
@@ -45,6 +46,11 @@ export default function PostDetailScreen() {
       return !prev;
     });
   }, []);
+
+  const handleShare = useCallback(async () => {
+    const url = `https://myapp.com/posts/${post.id}`;
+    await Share.share({ message: url, url });
+  }, [post.id]);
 
   const renderComment: ListRenderItem<Comment> = useCallback(
     ({ item }) => (
@@ -109,7 +115,7 @@ export default function PostDetailScreen() {
           <TouchableOpacity onPress={toggleLikePost} activeOpacity={0.7} className="mr-4">
             <Icon name={liked ? 'heart' : 'heart-outline'} size={28} color={liked ? '#ed4956' : '#262626'} />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} className="mr-4">
+          <TouchableOpacity onPress={handleShare} activeOpacity={0.7} className="mr-4">
             <Icon name="paper-plane-outline" size={26} color="#262626" />
           </TouchableOpacity>
         </View>
