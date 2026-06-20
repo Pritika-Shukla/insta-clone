@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import Svg, { Path, Circle, G } from 'react-native-svg';
+import Svg, { Path, Circle, G, Rect } from 'react-native-svg';
 import type { IconName, IconProps } from '../../types';
 
 type RenderFn = (color: string) => React.ReactNode;
@@ -84,12 +84,34 @@ const ICONS: Record<IconName, RenderFn> = {
     </G>
   ),
   'home': color => (
-    <Path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill={color} />
+    <G fill={color}>
+      <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" />
+      <Path d="M9 22V12h6v10H9z" fill="white" />
+    </G>
   ),
   'home-outline': color => (
     <G fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <Path d="M9 22V12h6v10" />
+    </G>
+  ),
+  'film-outline': color => (
+    <G fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <Rect x="2" y="2" width="20" height="20" rx="2" />
+      <Path d="M7 2v20M17 2v20M2 12h20M2 7h5M17 7h5M2 17h5M17 17h5" />
+    </G>
+  ),
+  'film': color => (
+    <G>
+      <Rect x="2" y="2" width="20" height="20" rx="2" fill={color} />
+      <Path
+        d="M7 2v20M17 2v20M2 12h20M2 7h5M17 7h5M2 17h5M17 17h5"
+        fill="none"
+        stroke="white"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </G>
   ),
   'play-circle': color => (

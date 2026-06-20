@@ -3,6 +3,7 @@ import {
   Animated,
   ActivityIndicator,
   FlatList,
+  Image,
   ListRenderItem,
   Text,
   TouchableOpacity,
@@ -56,14 +57,23 @@ const ReelSkeleton = ({ height }: { height: number }) => {
         {box(32, 32, { borderRadius: 16 })}
         {box(28, 28, { borderRadius: 14 })}
       </View>
-      <View className="absolute bottom-6 left-4 right-20">
-        {box(120, 14, { borderRadius: 7, marginBottom: 8 })}
-        {box('80%', 12, { borderRadius: 6, marginBottom: 5 })}
-        {box('55%', 12, { borderRadius: 6 })}
+      <View className="absolute bottom-8 left-4 right-20">
+        <View className="flex-row items-center mb-3">
+          {box(40, 40, { borderRadius: 20, marginRight: 10 })}
+          {box(130, 14, { borderRadius: 7 })}
+        </View>
+        {box('85%', 12, { borderRadius: 6, marginBottom: 6 })}
+        {box('60%', 12, { borderRadius: 6 })}
       </View>
     </View>
   );
 };
+
+const SHADOW = {
+  textShadowColor: 'rgba(0,0,0,0.65)',
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 4,
+} as const;
 
 // ─── Reel item ────────────────────────────────────────────────────────────────
 
@@ -71,9 +81,7 @@ const ReelItem = memo(({
   item, isActive, height, isLast, loadingMore,
   isLiked, onToggleLike, onOpenComments,
 }: ReelItemProps) => {
-  const [muted, setMuted] = useState(true);
   const videoUrl = getBestVideoUrl(item.video_files);
-  const toggleMuted = useCallback(() => setMuted(p => !p), []);
 
   return (
     <View className="w-full bg-[#111]" style={{ height }}>
@@ -83,7 +91,6 @@ const ReelItem = memo(({
         resizeMode="cover"
         paused={!isActive}
         repeat
-        muted={muted}
       />
 
       {isLast && loadingMore && (
@@ -93,7 +100,7 @@ const ReelItem = memo(({
       )}
 
       {/* Action buttons */}
-      <View className="absolute right-3 bottom-24 items-center gap-5">
+      <View className="absolute right-3 bottom-24 items-center gap-20">
         <TouchableOpacity className="items-center" onPress={onToggleLike} activeOpacity={0.7}>
           <Icon
             name={isLiked ? 'heart' : 'heart-outline'}
@@ -109,19 +116,30 @@ const ReelItem = memo(({
         <TouchableOpacity className="items-center" activeOpacity={0.7}>
           <Icon name="paper-plane-outline" size={28} color="#fff" />
         </TouchableOpacity>
-
-        <TouchableOpacity className="items-center" onPress={toggleMuted} activeOpacity={0.7}>
-          <Icon name={muted ? 'volume-mute' : 'volume-high'} size={24} color="#fff" />
-        </TouchableOpacity>
       </View>
 
       {/* Info */}
-      <View className="absolute bottom-6 left-4 right-20">
-        <Text className="text-white text-[15px] font-bold mb-1">
-          @{item.user.name.toLowerCase().replace(/\s+/g, '_')}
-        </Text>
-        <Text className="text-white/85 text-[13px] leading-[18px]" numberOfLines={2}>
-          🎬 {item.duration}s · Shot on Pexels
+      <View className="absolute bottom-8 left-4 right-[84px]">
+        <View className="flex-row items-center mb-2">
+          <Image
+            source={{ uri: item.image }}
+            className="w-10 h-10 rounded-full border-2 border-white"
+          />
+          <Text
+            className="text-white text-[15px] font-bold ml-[10px] flex-1"
+            style={SHADOW}
+          >
+            @{item.user.name.toLowerCase().replace(/\s+/g, '_')}
+          </Text>
+        </View>
+        <Text
+          className="text-white/90 text-[13px] leading-[19px]"
+          numberOfLines={2}
+          style={SHADOW}
+        >
+          {item.width > item.height
+            ? `Landscape · ${item.duration}s · Shot by ${item.user.name} on Pexels`
+            : `Portrait · ${item.duration}s · Shot by ${item.user.name} on Pexels`}
         </Text>
       </View>
     </View>

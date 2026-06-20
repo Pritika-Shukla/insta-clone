@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/Home/HomeScreen';
 import ReelsScreen from '../screens/Reels/ReelsScreen';
@@ -10,10 +10,28 @@ import type { IconName, TabParamList } from '../types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
-const TABS: Record<keyof TabParamList, { icon: IconName; iconFocused: IconName }> = {
-  Feed:    { icon: 'home-outline',        iconFocused: 'home' },
-  Reels:   { icon: 'play-circle-outline', iconFocused: 'play-circle' },
-  Profile: { icon: 'person-outline',      iconFocused: 'person' },
+const TABS: Record<keyof TabParamList, { icon: IconName; iconFocused: IconName; label: string }> = {
+  Feed:    { icon: 'home-outline',   iconFocused: 'home',   label: 'Home' },
+  Reels:   { icon: 'film-outline',   iconFocused: 'film',   label: 'Reels' },
+  Profile: { icon: 'person-outline', iconFocused: 'person', label: 'Me' },
+};
+
+const ACTIVE_COLOR   = '#4f46e5';
+const INACTIVE_COLOR = '#A1A1AA';
+const PILL_BG        = '#EEF2FF';
+
+const TAB_BAR_STYLE = {
+  backgroundColor: '#ffffff',
+  borderTopWidth: 1,
+  borderTopColor: '#F4F4F5',
+  height: Platform.OS === 'ios' ? 88 : 68,
+  paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+  paddingTop: 6,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: -3 },
+  shadowOpacity: 0.07,
+  shadowRadius: 14,
+  elevation: 14,
 };
 
 export default function MainTabNavigator() {
@@ -22,33 +40,29 @@ export default function MainTabNavigator() {
       screenOptions={({ route }: BottomTabScreenProps<TabParamList>) => ({
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopWidth: 1,
-          borderTopColor: '#f0f0f0',
-          height: Platform.OS === 'ios' ? 82 : 60,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
-          paddingTop: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
-          elevation: 10,
-        },
-        tabBarActiveTintColor: '#4f46e5',
-        tabBarInactiveTintColor: '#c0c0c0',
+        tabBarStyle: TAB_BAR_STYLE,
+        tabBarActiveTintColor: ACTIVE_COLOR,
+        tabBarInactiveTintColor: INACTIVE_COLOR,
         tabBarIcon: ({ color, focused }) => {
           const tab = TABS[route.name as keyof TabParamList];
           return (
             <View className="items-center justify-center">
-              <Icon
-                name={focused ? tab.iconFocused : tab.icon}
-                size={26}
-                color={color}
-              />
-              {focused && (
-                <View className="w-1 h-1 rounded-full bg-[#4f46e5] mt-1" />
-              )}
+              <View
+                className="w-[52px] h-[30px] items-center justify-center rounded-[15px]"
+                style={focused ? { backgroundColor: PILL_BG } : undefined}
+              >
+                <Icon
+                  name={focused ? tab.iconFocused : tab.icon}
+                  size={22}
+                  color={color}
+                />
+              </View>
+              <Text
+                className="text-[10px] mt-[3px]"
+                style={{ color, fontWeight: focused ? '600' : '400', letterSpacing: 0.2 }}
+              >
+                {tab.label}
+              </Text>
             </View>
           );
         },

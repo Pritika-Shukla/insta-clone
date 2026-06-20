@@ -15,6 +15,8 @@ export type IconName =
   | 'add'
   | 'home'
   | 'home-outline'
+  | 'film'
+  | 'film-outline'
   | 'play-circle'
   | 'play-circle-outline'
   | 'volume-high'

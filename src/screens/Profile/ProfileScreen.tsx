@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
 import Icon from '../../components/common/Icon';
@@ -28,8 +28,7 @@ export default function ProfileScreen() {
   const logout = useAuthStore(state => state.logout);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const color      = avatarColor(name || 'U');
-  const headerTint = color + '22';
+  const color = avatarColor(name || 'U');
 
   const handleLogout = useCallback(() => {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
@@ -46,84 +45,118 @@ export default function ProfileScreen() {
   }, [logout]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-[#F7F7F8]" edges={['top']}>
+      <ScrollView showsVerticalScrollIndicator={false} bounces>
 
-      {/* Tinted header band */}
-      <View style={{ height: 160, backgroundColor: headerTint }} />
-
-      {/* Avatar overlapping the fold */}
-      <View className="items-center" style={{ marginTop: -60 }}>
-        <View
-          className="items-center justify-center rounded-full"
-          style={{
-            width: 120,
-            height: 120,
-            backgroundColor: color,
-            borderWidth: 5,
-            borderColor: '#ffffff',
-            shadowColor: color,
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.4,
-            shadowRadius: 16,
-            elevation: 10,
-          }}>
-          <Text className="font-extrabold text-white" style={{ fontSize: 42, letterSpacing: -1 }}>
-            {initials(name || 'U')}
-          </Text>
+        {/* Cover banner */}
+        <View className="h-[140px] overflow-hidden" style={{ backgroundColor: color }}>
+          <View
+            className="absolute w-[200px] h-[200px] rounded-full"
+            style={{ backgroundColor: 'rgba(255,255,255,0.09)', top: -60, right: -40 }}
+          />
+          <View
+            className="absolute w-[130px] h-[130px] rounded-full"
+            style={{ backgroundColor: 'rgba(255,255,255,0.07)', bottom: -40, left: 24 }}
+          />
         </View>
-      </View>
 
-      {/* Name + logout icon */}
-      <View className="flex-row items-center justify-center mt-5 px-8" style={{ gap: 10 }}>
-        <Text className="text-2xl font-bold text-[#1a1a1a]" style={{ letterSpacing: -0.5 }}>
+        {/* Avatar */}
+        <View className="self-center" style={{ marginTop: -52 }}>
+          <View
+            className="w-[104px] h-[104px] rounded-full border-4 border-[#F7F7F8] items-center justify-center"
+            style={{
+              backgroundColor: color,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.18,
+              shadowRadius: 10,
+              elevation: 8,
+            }}>
+            <Text
+              className="text-white font-semibold"
+              style={{ fontSize: 32, letterSpacing: -1 }}>
+              {initials(name || 'U')}
+            </Text>
+          </View>
+          <View
+            className="absolute w-[18px] h-[18px] rounded-full bg-green-500 border-[3px] border-[#F7F7F8]"
+            style={{ bottom: 4, right: 4 }}
+          />
+        </View>
+
+        {/* Name */}
+        <Text
+          className="text-center text-[22px] font-bold text-[#111827] mt-[14px]"
+          style={{ letterSpacing: -0.4 }}>
           {name}
         </Text>
+
+        {/* Member badge */}
+        <View className="items-center mt-2">
+          <View
+            className="flex-row items-center px-[11px] py-1 rounded-full gap-[5px]"
+            style={{ backgroundColor: color + '22' }}>
+            <View
+              className="w-[6px] h-[6px] rounded-full"
+              style={{ backgroundColor: color }}
+            />
+            <Text
+              className="text-xs font-semibold"
+              style={{ color, letterSpacing: 0.2 }}>
+              Member
+            </Text>
+          </View>
+        </View>
+
+        {/* Account section */}
+        <View className="mx-5 mt-7">
+          <Text
+            className="text-[11px] font-semibold text-[#9CA3AF] mb-[10px] ml-1"
+            style={{ letterSpacing: 0.8 }}>
+            ACCOUNT
+          </Text>
+
+          <View
+            className="bg-white rounded-[14px] px-[14px] py-[13px] flex-row items-center gap-3"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.04,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+            <View
+              className="w-[38px] h-[38px] rounded-[10px] items-center justify-center"
+              style={{ backgroundColor: color + '18' }}>
+              <Icon name="paper-plane-outline" size={17} color={color} />
+            </View>
+            <View className="flex-1">
+              <Text
+                className="text-[10px] font-medium text-[#9CA3AF] mb-0.5"
+                style={{ letterSpacing: 0.4 }}>
+                Email
+              </Text>
+              <Text className="text-sm font-medium text-[#111827]" numberOfLines={1}>
+                {email}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Log out */}
         <TouchableOpacity
           onPress={handleLogout}
           disabled={loggingOut}
-          activeOpacity={0.7}
-          className="w-9 h-9 rounded-full bg-[#fff0f1] items-center justify-center">
-          <Icon name="log-out-outline" size={17} color="#ed4956" />
+          activeOpacity={0.75}
+          className="mx-5 mt-6 py-[14px] rounded-[14px] bg-red-50 border border-red-200 flex-row items-center justify-center gap-2">
+          <Icon name="log-out-outline" size={17} color="#ef4444" />
+          <Text className="text-[15px] font-semibold text-red-500">
+            {loggingOut ? 'Logging out…' : 'Log out'}
+          </Text>
         </TouchableOpacity>
-      </View>
 
-      {/* Email */}
-      <View className="flex-row items-center justify-center mt-1" style={{ gap: 5 }}>
-        <Icon name="paper-plane-outline" size={13} color="#9e9e9e" />
-        <Text className="text-[13px] text-[#9e9e9e]">{email}</Text>
-      </View>
-
-      {/* Member pill */}
-      <View className="items-center mt-4">
-        <View className="px-3 py-1 rounded-full" style={{ backgroundColor: headerTint }}>
-          <Text className="text-xs font-semibold" style={{ color }}>
-            Member
-          </Text>
-        </View>
-      </View>
-
-      {/* Divider */}
-      <View className="h-px mx-6 mt-8 bg-[#f2f2f2]" />
-
-      {/* Info card */}
-      <View
-        className="flex-row items-center mx-6 mt-5 px-5 py-4 rounded-2xl bg-[#fafafa] border border-[#f0f0f0]"
-        style={{ gap: 16 }}>
-        <View
-          className="w-10 h-10 rounded-full items-center justify-center"
-          style={{ backgroundColor: headerTint }}>
-          <Icon name="person-outline" size={18} color={color} />
-        </View>
-        <View className="flex-1">
-          <Text className="text-[11px] text-[#b0b0b0] font-semibold mb-0.5" style={{ letterSpacing: 0.8 }}>
-            SIGNED IN AS
-          </Text>
-          <Text className="text-sm font-semibold text-[#1a1a1a]" numberOfLines={1}>
-            {email}
-          </Text>
-        </View>
-      </View>
-
+        <View className="h-9" />
+      </ScrollView>
     </SafeAreaView>
   );
 }
