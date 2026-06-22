@@ -193,9 +193,6 @@ Then update the workflow's Gradle step:
       -Pandroid.injected.signing.key.password=$KEY_PASSWORD
 ```
 
-### iOS
-
-iOS builds require Apple Developer certificates and cannot run on GitHub's free Linux runners. Use [Fastlane](https://fastlane.tools/) with a macOS runner or [Expo EAS](https://expo.dev/eas) for CI/CD.
 
 ---
 
