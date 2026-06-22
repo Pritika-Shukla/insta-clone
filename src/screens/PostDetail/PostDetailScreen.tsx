@@ -74,11 +74,11 @@ export default function PostDetailScreen() {
           <Text className="text-[13.5px] font-semibold text-[#262626]">{post.username}</Text>
           {post.location ? <Text className="text-[11px] text-[#737373] mt-px">{post.location}</Text> : null}
         </View>
-        {!following && (
-          <TouchableOpacity className="px-3 py-[5px] rounded-md border border-[#dbdbdb]" onPress={() => setFollowing(true)} activeOpacity={0.7}>
-            <Text className="text-[13px] font-semibold text-[#0095f6]">Follow</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity className="px-3 py-[5px] rounded-md border border-[#dbdbdb]" onPress={() => setFollowing(p => !p)} activeOpacity={0.7}>
+          <Text className={`text-[13px] font-semibold ${following ? 'text-[#262626]' : 'text-[#0095f6]'}`}>
+            {following ? 'Following' : 'Follow'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Media */}

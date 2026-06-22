@@ -2,6 +2,8 @@
 
 An Instagram clone built with React Native. Pulls real photos and videos from the Pexels API, supports full-screen reels,  comments, persistent likes/bookmarks, and a local auth flow.
 
+<video src="src/assets/vdo.mp4" autoplay loop muted playsinline controls width="320"></video>
+
 ---
 
 ## Features

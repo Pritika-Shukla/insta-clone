@@ -57,16 +57,15 @@ const PostCard = memo(({ post, isActive = false }: PostCardProps) => {
           ) : null}
         </View>
         <View className="flex-row items-center gap-[6px]">
-          {!following && (
-            <TouchableOpacity
-              className="px-3 py-[5px] rounded-md border border-[#dbdbdb]"
-              onPress={toggleFollow}
-              activeOpacity={0.7}
-            >
-              <Text className="text-[13px] font-semibold text-[#0095f6]">Follow</Text>
-            </TouchableOpacity>
-          )}
-         
+          <TouchableOpacity
+            className="px-3 py-[5px] rounded-md border border-[#dbdbdb]"
+            onPress={toggleFollow}
+            activeOpacity={0.7}
+          >
+            <Text className={`text-[13px] font-semibold ${following ? 'text-[#262626]' : 'text-[#0095f6]'}`}>
+              {following ? 'Following' : 'Follow'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
 
