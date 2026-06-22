@@ -91,6 +91,8 @@ const ReelItem = memo(({
         resizeMode="cover"
         paused={!isActive}
         repeat
+        poster={item.image}
+        posterResizeMode="cover"
       />
 
       {isLast && loadingMore && (
