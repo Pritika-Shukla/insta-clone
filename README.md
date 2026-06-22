@@ -7,7 +7,7 @@ An Instagram clone built with React Native. Pulls real photos and videos from th
 ## Features
 
 - **Feed** — Infinite scroll of photos and videos (interleaved every 4 photos), skeleton placeholders, offline banner with cached posts
-- **Reels** — Full-screen vertical video feed with snap pagination, like button (persisted), and comments bottom sheet
+- **Reels** — Full-screen vertical video feed with snap pagination, like button (persisted), comments bottom sheet, and TTL-based video caching
 - **Post Detail** — Single post view with mute toggle, like / bookmark / share / follow, and paginated comments
 - **Comments** — Paginated list, add your own comments, like/unlike individual comments (all persisted locally)
 - **Profile** — Deterministic initials avatar, name/email display, logout with confirmation
@@ -119,6 +119,7 @@ src/
 ├── services/
 │   ├── api/            apiFetch client, feedApi, reelsApi, commentsApi
 │   ├── feedCache.ts    AsyncStorage feed cache (max 10 posts)
+│   ├── reelsCache.ts   Video file cache — downloads mp4s to disk, 1h TTL
 │   └── storage.ts      Generic AsyncStorage wrapper
 ├── store/              authStore (Zustand)
 ├── hooks/              useFeed, useReels, useComments, useCommentInteractions, useReelInteractions
@@ -136,6 +137,7 @@ src/
 | `@comments_likes` | Liked comment IDs |
 | `@comments_user` | User-added comments |
 | `@reels_likes` | Liked reel video IDs |
+| `@reels_video_cache` | Cached reel metadata + local file paths (TTL: 1 hour) |
 
 ---
 
@@ -200,4 +202,5 @@ iOS builds require Apple Developer certificates and cannot run on GitHub's free 
 - No real authentication — password is validated client-side and never stored
 - Pexels API free tier: 200 requests/hour, 20,000/month
 - Feed caches the last 10 posts for offline viewing
+- Reels cache up to 4 videos as local mp4 files with a 1-hour TTL — fresh cache serves instantly while new data loads in the background; stale cache is discarded
 - Video autoplay respects viewability (pauses when < 60% visible)
