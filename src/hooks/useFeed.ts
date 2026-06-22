@@ -66,7 +66,6 @@ export function useFeed() {
   const [loadingMore, setLoadingMore]   = useState(false);
   const [error, setError]               = useState(false);
   const [loadMoreError, setLoadMoreError] = useState(false);
-  const [fromCache, setFromCache]       = useState(false);
 
   const nextPageUrl = useRef<string | null>(null);
   const isFetching  = useRef(false);
@@ -78,7 +77,6 @@ export function useFeed() {
       const cached = await feedCache.get();
       if (cached?.length && !cancelled) {
         setPosts(cached);
-        setFromCache(true);
         setLoading(false);
       }
 
@@ -98,7 +96,6 @@ export function useFeed() {
 
         const fresh = interleave(photos, videos, VIDEOS_EVERY_N);
         setPosts(fresh);
-        setFromCache(false);
         nextPageUrl.current = photoResult.value.next_page ?? null;
 
         await feedCache.set(fresh);
@@ -133,5 +130,5 @@ export function useFeed() {
     }
   }, [loadMoreError]);
 
-  return { posts, loading, loadingMore, error, loadMoreError, fromCache, loadMore };
+  return { posts, loading, loadingMore, error, loadMoreError, loadMore };
 }

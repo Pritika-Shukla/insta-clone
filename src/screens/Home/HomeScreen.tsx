@@ -20,13 +20,6 @@ import { FeedSkeleton } from '../../components/feed/FeedSkeleton';
 const Divider = () => <View className="h-2 bg-[#f0f0f0]" />;
 const listContentStyle = { paddingBottom: 16 };
 
-const OfflineBanner = () => (
-  <View className="flex-row items-center justify-center gap-1.5 bg-[#fff3cd] py-2 px-4">
-    <Icon name="alert-circle-outline" size={14} color="#856404" />
-    <Text className="text-xs text-[#856404]">You're offline — showing cached posts</Text>
-  </View>
-);
-
 const StaticHeader = () => (
   <>
     <FeedHeader />
@@ -34,7 +27,7 @@ const StaticHeader = () => (
 );
 
 export default function HomeScreen() {
-  const { posts, loading, loadingMore, error, loadMoreError, fromCache, loadMore } = useFeed();
+  const { posts, loading, loadingMore, error, loadMoreError, loadMore } = useFeed();
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -55,15 +48,7 @@ export default function HomeScreen() {
 
   const keyExtractor = useCallback((item: Post) => item.id, []);
 
-  const renderHeader = useCallback(
-    () => (
-      <>
-        <FeedHeader />
-        {fromCache && <OfflineBanner />}
-      </>
-    ),
-    [fromCache],
-  );
+  const renderHeader = useCallback(() => <FeedHeader />, []);
 
   const renderFooter = useCallback(
     () =>

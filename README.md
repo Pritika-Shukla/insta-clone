@@ -1,97 +1,203 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Instagram Clone
 
-# Getting Started
+An Instagram clone built with React Native. Pulls real photos and videos from the Pexels API, supports full-screen reels,  comments, persistent likes/bookmarks, and a local auth flow.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **Feed** — Infinite scroll of photos and videos (interleaved every 4 photos), skeleton placeholders, offline banner with cached posts
+- **Reels** — Full-screen vertical video feed with snap pagination, like button (persisted), and comments bottom sheet
+- **Post Detail** — Single post view with mute toggle, like / bookmark / share / follow, and paginated comments
+- **Comments** — Paginated list, add your own comments, like/unlike individual comments (all persisted locally)
+- **Profile** — Deterministic initials avatar, name/email display, logout with confirmation
+- **Auth** — Name, email, password validation; credentials stored locally via AsyncStorage (no server)
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
 
-```sh
-# Using npm
-npm start
+## Tech Stack
 
-# OR using Yarn
-yarn start
-```
+| Layer | Library |
+|---|---|
+| Framework | React Native 0.86 + TypeScript |
+| Navigation | React Navigation v7 (Stack + Bottom Tabs) |
+| State | Zustand |
+| Styling | NativeWind (Tailwind CSS) |
+| HTTP | Custom `apiFetch<T>()` wrapper (no axios) |
+| Video | react-native-video |
+| Images | react-native-fast-image |
+| Storage | AsyncStorage |
+| Animation | react-native-reanimated |
+| Icons | Custom SVG system (27 icons) |
+| Data — Media | [Pexels API](https://www.pexels.com/api/) |
+| Data — Comments | JSONPlaceholder |
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## Prerequisites
 
-### Android
+- Node >= 22.11.0
+- npm
+- **iOS**: Xcode + CocoaPods (`sudo gem install cocoapods`)
+- **Android**: Android Studio, JDK 17, `ANDROID_HOME` set in your shell
+- Pexels API key — free at [pexels.com/api](https://www.pexels.com/api/)
 
-```sh
-# Using npm
-npm run android
+---
 
-# OR using Yarn
-yarn android
+## Setup
+
+```bash
+# 1. Clone
+git clone https://github.com/your-username/insta-clone.git
+cd insta-clone
+
+# 2. Install dependencies
+npm install --legacy-peer-deps
+
+# 3. Add your Pexels API key
+echo "PEXELS_API_KEY=your_key_here" > .env
 ```
 
 ### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+```bash
+cd ios && pod install && cd ..
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Android
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```bash
+npm run android
+```
 
-## Step 3: Modify your app
+> If you see `adb: command not found`, add Android platform-tools to your PATH:
+> ```bash
+> export ANDROID_HOME=$HOME/Library/Android/sdk
+> export PATH=$PATH:$ANDROID_HOME/platform-tools
+> ```
 
-Now that you have successfully run the app, let's make changes!
+---
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## Running
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```bash
+npm start        # Start Metro bundler
+npm run ios      # Run on iOS simulator
+npm run android  # Run on Android emulator / device
+npm run lint     # ESLint
+npm test         # Jest
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+---
 
-## Congratulations! :tada:
+## Environment Variables
 
-You've successfully run and modified your React Native App. :partying_face:
+| Variable | Required | Description |
+|---|---|---|
+| `PEXELS_API_KEY` | Yes | Pexels API key for photos and videos |
 
-### Now what?
+Create a `.env` file in the project root (already in `.gitignore`).
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+---
 
-# Troubleshooting
+## Project Structure
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```
+src/
+├── components/
+│   ├── common/         Icon.tsx (27 custom SVG icons)
+│   └── feed/           PostCard, FeedHeader, FeedSkeleton
+├── screens/
+│   ├── Auth/           LoginScreen
+│   ├── Home/           HomeScreen (infinite scroll feed)
+│   ├── Reels/          ReelsScreen + ReelCommentsSheet
+│   ├── Comments/       CommentsScreen + sub-components
+│   ├── PostDetail/     PostDetailScreen
+│   └── Profile/        ProfileScreen
+├── navigation/         RootNavigator, MainTabNavigator
+├── services/
+│   ├── api/            apiFetch client, feedApi, reelsApi, commentsApi
+│   ├── feedCache.ts    AsyncStorage feed cache (max 10 posts)
+│   └── storage.ts      Generic AsyncStorage wrapper
+├── store/              authStore (Zustand)
+├── hooks/              useFeed, useReels, useComments, useCommentInteractions, useReelInteractions
+├── types/              index.ts — 31 shared types
+├── constants/          API keys, regex, storage keys
+└── utils/              format.ts (formatCount)
+```
 
-# Learn More
+### AsyncStorage Keys
 
-To learn more about React Native, take a look at the following resources:
+| Key | Contents |
+|---|---|
+| `@auth_user` | `{ name, email }` |
+| `@feed_cache` | Last 10 posts |
+| `@comments_likes` | Liked comment IDs |
+| `@comments_user` | User-added comments |
+| `@reels_likes` | Liked reel video IDs |
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+---
+
+## GitHub Deployment
+
+### Android Release APK
+
+A GitHub Actions workflow at `.github/workflows/release.yml` automatically builds a signed release APK on every push to `main`.
+
+**What it does:**
+
+1. Checks out the repo
+2. Sets up Node 20 and installs dependencies (`--legacy-peer-deps`)
+3. Sets up Java 17 (Temurin)
+4. Runs `./gradlew assembleRelease` in the `android/` directory
+5. Uploads the APK as a GitHub Actions artifact (`app-release`)
+
+**Trigger:** Push to `main` branch.
+
+**Download the APK:**
+
+1. Go to your repo on GitHub
+2. Click **Actions** → select the latest **Android Release Build** run
+3. Scroll to **Artifacts** → download `app-release`
+
+**To add signing** (for Play Store distribution), add these secrets to your GitHub repo under **Settings → Secrets → Actions**:
+
+| Secret | Description |
+|---|---|
+| `KEYSTORE_FILE` | Base64-encoded `.jks` keystore |
+| `KEY_ALIAS` | Key alias |
+| `KEY_PASSWORD` | Key password |
+| `STORE_PASSWORD` | Keystore password |
+
+Then update the workflow's Gradle step:
+
+```yaml
+- name: Build Release APK
+  env:
+    KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+    KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+    KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+    STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+  run: |
+    echo "$KEYSTORE_FILE" | base64 --decode > android/app/release.keystore
+    cd android
+    ./gradlew assembleRelease \
+      -Pandroid.injected.signing.store.file=../app/release.keystore \
+      -Pandroid.injected.signing.store.password=$STORE_PASSWORD \
+      -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+      -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+```
+
+### iOS
+
+iOS builds require Apple Developer certificates and cannot run on GitHub's free Linux runners. Use [Fastlane](https://fastlane.tools/) with a macOS runner or [Expo EAS](https://expo.dev/eas) for CI/CD.
+
+---
+
+## Notes
+
+- No real authentication — password is validated client-side and never stored
+- Pexels API free tier: 200 requests/hour, 20,000/month
+- Feed caches the last 10 posts for offline viewing
+- Video autoplay respects viewability (pauses when < 60% visible)
