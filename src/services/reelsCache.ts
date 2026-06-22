@@ -4,6 +4,7 @@ import type { PexelsVideo, PexelsVideoFile } from '../types';
 
 const CACHE_META_KEY = '@reels_video_cache';
 const CACHE_COUNT = 4;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 function getCacheDir(): string {
   return `${RNFS.CachesDirectoryPath}/reels`;
@@ -68,4 +69,10 @@ export async function getCachedReels(): Promise<PexelsVideo[]> {
 export async function hasCachedReels(): Promise<boolean> {
   const meta = await storage.get<ReelsCacheMeta>(CACHE_META_KEY);
   return (meta?.videos?.length ?? 0) > 0;
+}
+
+export async function isCacheStale(): Promise<boolean> {
+  const meta = await storage.get<ReelsCacheMeta>(CACHE_META_KEY);
+  if (!meta) return true;
+  return Date.now() - meta.cachedAt > CACHE_TTL_MS;
 }

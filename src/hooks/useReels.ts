@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import { reelsApi } from '../services/api/reelsApi';
-import { cacheReels, getCachedReels } from '../services/reelsCache';
+import { cacheReels, getCachedReels, isCacheStale } from '../services/reelsCache';
 import type { PexelsVideo } from '../types';
 
 const CHUNK_SIZE = 5;
@@ -34,29 +34,38 @@ export function useReels() {
 
       if (!online) {
         setIsOffline(true);
-        const cached = await getCachedReels();
+        const stale = await isCacheStale();
+        const cached = stale ? [] : await getCachedReels();
         if (!cancelled) {
-          if (cached.length > 0) {
-            setVideos(cached);
-          } else {
-            setError(true);
-          }
+          cached.length > 0 ? setVideos(cached) : setError(true);
           setLoading(false);
         }
         return;
       }
 
+      // Seed UI instantly from cache if fresh, then replace with live data
+      let seededFromCache = false;
+      const stale = await isCacheStale();
+      if (!stale) {
+        const cached = await getCachedReels();
+        if (!cancelled && cached.length > 0) {
+          setVideos(cached);
+          setLoading(false);
+          seededFromCache = true;
+        }
+      }
+
       try {
         const data = await reelsApi.fetch();
         if (!cancelled) {
-          const toCache = data.videos.slice(0, 4);
           buffer.current = data.videos;
           nextPageUrl.current = data.next_page ?? null;
+          setVideos([]);
           flushChunk();
-          cacheReels(toCache).catch(() => {});
+          cacheReels(data.videos.slice(0, 4)).catch(() => {});
         }
       } catch {
-        if (!cancelled) {
+        if (!cancelled && !seededFromCache) {
           const cached = await getCachedReels();
           if (cached.length > 0) {
             setVideos(cached);
