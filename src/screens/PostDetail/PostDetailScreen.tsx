@@ -67,15 +67,6 @@ export default function PostDetailScreen() {
 
   const ListHeader = (
     <View>
-      {/* Header bar */}
-      <View className="flex-row items-center justify-between px-1 py-[6px] border-b border-[#dbdbdb]">
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} className="w-11 h-11 items-center justify-center">
-          <Icon name="arrow-back" size={24} color="#262626" />
-        </TouchableOpacity>
-        <Text className="text-base font-semibold text-[#262626]">Post</Text>
-        <View className="w-11 h-11" />
-      </View>
-
       {/* Post header */}
       <View className="flex-row items-center px-3 py-[10px]">
         <Image source={{ uri: post.avatar }} className="w-[38px] h-[38px] rounded-full border border-[#dbdbdb]" />
@@ -147,6 +138,13 @@ export default function PostDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+      <View className="flex-row items-center justify-between px-1 py-[6px] border-b border-[#dbdbdb]">
+        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} className="w-11 h-11 items-center justify-center">
+          <Icon name="arrow-back" size={24} color="#262626" />
+        </TouchableOpacity>
+        <Text className="text-base font-semibold text-[#262626]">Post</Text>
+        <View className="w-11 h-11" />
+      </View>
       <FlatList
         data={loading ? [] : comments}
         keyExtractor={keyExtractor}
